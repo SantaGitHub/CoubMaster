@@ -1,0 +1,16 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JewishCat.DiscordBot", "JewishCat.DiscordBot.csproj", "{50D1A29D-EC80-4F1D-B104-236D21EB5747}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{50D1A29D-EC80-4F1D-B104-236D21EB5747}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{50D1A29D-EC80-4F1D-B104-236D21EB5747}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{50D1A29D-EC80-4F1D-B104-236D21EB5747}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{50D1A29D-EC80-4F1D-B104-236D21EB5747}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
