@@ -26,7 +26,7 @@ namespace JewishCat.DiscordBot
             _logger = logger;
             _commands = commands;
             _services = services;
-            _token = "ODE0MTQ0MjY5MDUyMjgwODMz.YDZk7w.Go2qHfbqw_vL99EpVx9KM0IsKeo";
+            _token = "TOKEN";
         }
 
         public override async Task StartAsync(CancellationToken cancellationToken)
