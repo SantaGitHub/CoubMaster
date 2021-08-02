@@ -61,5 +61,18 @@ namespace JewishCat.DiscordBot
     public class CoubModel
     {
         public FileVersions file_versions { get; set; }
+        public List<Tags> tags { get; set; }
+        public List<Communities> communities { get; set; }
+    }
+    
+    public class Tags
+    {
+        public long id { get; set; }
+        public string title { get; set; }
+    }    
+    public class Communities
+    {
+        public long id { get; set; }
+        public string title { get; set; }
     }
 }

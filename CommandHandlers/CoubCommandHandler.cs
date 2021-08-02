@@ -32,48 +32,53 @@ namespace JewishCat.DiscordBot.CommandHandlers
         {
             if (await _userRepository.CheckIgnoringUser(Context.User.Id))
                 return;
-            foreach (var coub in coubs) await CoubAsync(coub);
+            await CoubAsync(string.Join(' ', coubs));
         }
 
         [Command("c")]
         [Alias("с", "coub", "коуб")]
         [RequireContext(ContextType.Guild)]
-        public async Task CoubAsync(string coub)
+        public async Task CoubAsync(string input)
         {
             if (await _userRepository.CheckIgnoringUser(Context.User.Id))
                 return;
 
             _logger.LogInformation(
-                $"User: {Context.User.Username} execute command in {Context.Guild.Name} with param: {coub}");
-            if (!coub.Contains("coub.com/view/"))
+                $"User: {Context.User.Username} execute command in {Context.Guild.Name} with param: {input}");
+            if (string.IsNullOrEmpty(input) || !input.Contains("coub.com/view/"))
+                return;
+            
+            var coub = input.Split(' ').First();
+            var ping = input.Split(' ').Length > 1 ? string.Join(' ', input.Split(' ')[1..]) : string.Empty;
+            var name = coub.Split('/').Last();
+            
+            var request = new RestRequest($"{CoubsUrlBase}{name}", Method.GET);
+            request.AddHeader("Cookie", "is_logged_in=false");
+            var response = await _restClient.ExecuteAsync(request);
+
+            if (string.IsNullOrEmpty(response.Content))
                 return;
 
-            var name = coub.Split('/').Last();
+            if (response.Content.Contains("Coub not found"))
+            {
+                await ReplyAsync($"Coub: {coub} - не найден");
+                return;
+            }
+
+            var coubModel = JsonConvert.DeserializeObject<CoubModel>(response.Content);
+
+            var nsfw = coubModel.tags.Any(i => i.id == 67203 || i.title.Contains("nsfw")) || coubModel.communities.Any(i => i.id == 24 || i.title.Contains("nsfw"));
+
+            var client = new RestClient();
+            if (string.IsNullOrEmpty(coubModel.file_versions.share.@default))
+            {
+                await ReplyAsync(
+                    $"Coub: {coub} has no share link. Please click the \"Download\" button on the Coub website for a link to appear. And try again");
+                return;
+            }
+            
             if (!File.Exists($"coubs/{name}.mp4"))
             {
-                var request = new RestRequest($"{CoubsUrlBase}{name}", Method.GET);
-                request.AddHeader("Cookie", "is_logged_in=false");
-                var response = await _restClient.ExecuteAsync(request);
-
-                if (string.IsNullOrEmpty(response.Content))
-                    return;
-
-                if (response.Content.Contains("Coub not found"))
-                {
-                    await ReplyAsync($"Coub: {coub} - не найден");
-                    return;
-                }
-
-                var coubModel = JsonConvert.DeserializeObject<CoubModel>(response.Content);
-
-                var client = new RestClient();
-                if (string.IsNullOrEmpty(coubModel.file_versions.share.@default))
-                {
-                    await ReplyAsync(
-                        $"Coub: {coub} has no share link. Please click the \"Download\" button on the Coub website for a link to appear. And try again");
-                    return;
-                }
-
                 var requestFile = new RestRequest($"{coubModel.file_versions.share.@default}", Method.GET);
                 var responseBytes = await client.ExecuteAsync(requestFile);
 
@@ -86,7 +91,7 @@ namespace JewishCat.DiscordBot.CommandHandlers
                 await File.WriteAllBytesAsync($"coubs/{name}.mp4", responseBytes.RawBytes);
             }
 
-            await Context.Channel.SendFileAsync($"coubs/{name}.mp4");
+            await Context.Channel.SendFileAsync($"coubs/{name}.mp4", ping, isSpoiler: nsfw);
             await Context.Channel.DeleteMessageAsync(Context.Message);
         }
     }

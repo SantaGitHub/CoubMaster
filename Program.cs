@@ -1,9 +1,12 @@
+using System;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using JewishCat.DiscordBot.EFCore;
 using JewishCat.DiscordBot.EFCore.Interface;
+using JewishCat.DiscordBot.Options;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using RestSharp;
@@ -23,8 +26,11 @@ namespace JewishCat.DiscordBot
         {
             return Host.CreateDefaultBuilder(args)
                 .UseSystemd()
-                .ConfigureServices(services =>
+                .ConfigureServices((hostContext, services) =>
                 {
+                    var config = hostContext.Configuration;
+                    services.Configure<BotOptions>(config.GetSection("BotOptions"));
+                    
                     services.AddDbContext<LocalDbContext>(builder => builder.UseSqlite());
                     services.AddTransient<IUserRepository, UserRepository>();
 
@@ -44,6 +50,10 @@ namespace JewishCat.DiscordBot
                         UserAgent = "Discord Bot"
                     });
                     services.AddHostedService<BotBackgroundService>();
+                })
+                .ConfigureAppConfiguration((hostingContext, config) =>
+                {
+                    config.AddConfigsForBuilder(hostingContext.HostingEnvironment);
                 });
         }
     }

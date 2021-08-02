@@ -5,8 +5,10 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using JewishCat.DiscordBot.Options;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace JewishCat.DiscordBot
 {
@@ -20,13 +22,13 @@ namespace JewishCat.DiscordBot
 
 
         public BotBackgroundService(DiscordSocketClient client, ILogger<BotBackgroundService> logger,
-            CommandService commands, IServiceProvider services)
+            CommandService commands, IServiceProvider services, IOptions<BotOptions> options)
         {
             _client = client;
             _logger = logger;
             _commands = commands;
             _services = services;
-            _token = "TOKEN";
+            _token = options.Value.Token;
         }
 
         public override async Task StartAsync(CancellationToken cancellationToken)
@@ -46,10 +48,10 @@ namespace JewishCat.DiscordBot
             switch (arg.Severity)
             {
                 case LogSeverity.Critical:
-                    _logger.LogCritical("Exception: " + arg.Exception.Message + "Message: " + arg.Message);
+                    _logger.LogCritical(arg.Exception, "Message: " + arg.Message);
                     break;
                 case LogSeverity.Error:
-                    _logger.LogError("Exception: " + arg.Exception.Message + "Message: " + arg.Message);
+                    _logger.LogError(arg.Exception, "Message: " + arg.Message);
                     break;
                 case LogSeverity.Warning:
                     _logger.LogWarning("Message: " + arg.Message);
@@ -64,7 +66,7 @@ namespace JewishCat.DiscordBot
                     _logger.LogDebug("Message: " + arg.Message);
                     break;
                 default:
-                    _logger.LogError("Message: " + arg.Message);
+                    _logger.LogError(arg.Exception, "Message: " + arg.Message);
                     break;
             }
 
