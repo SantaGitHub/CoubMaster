@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using Discord;
 using Discord.Commands;
 using JewishCat.DiscordBot.EFCore.Interface;
 using Microsoft.Extensions.Logging;
@@ -91,7 +92,32 @@ namespace JewishCat.DiscordBot.CommandHandlers
                 await File.WriteAllBytesAsync($"coubs/{name}.mp4", responseBytes.RawBytes);
             }
 
-            await Context.Channel.SendFileAsync($"coubs/{name}.mp4", ping, isSpoiler: nsfw);
+            var builder = new EmbedBuilder()
+            {
+                Author = new EmbedAuthorBuilder()
+                {
+                    Name = Context.User.Username,
+                    IconUrl = Context.User.GetAvatarUrl()
+                },
+                Color = Color.Orange
+            };
+            builder.AddField(x =>
+            {
+                x.Name = "Link to coub:";
+                x.Value = coub;
+                x.IsInline = false;
+            });
+            if (!string.IsNullOrEmpty(ping))
+            {
+                builder.AddField(x =>
+                {
+                    x.Name = "Message:";
+                    x.Value = ping;
+                    x.IsInline = false;
+                });
+            }
+            
+            await Context.Channel.SendFileAsync($"coubs/{name}.mp4", "", embed: builder.Build(), isSpoiler: nsfw);
             await Context.Channel.DeleteMessageAsync(Context.Message);
         }
     }
