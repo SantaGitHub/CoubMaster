@@ -89,6 +89,7 @@ namespace JewishCat.DiscordBot.CommandHandlers
                     x.IsInline = false;
                 });
                 await ReplyAsync("", embed: builder.Build());
+                await Context.Channel.DeleteMessageAsync(Context.Message);
                 return;
             }
 
@@ -107,6 +108,7 @@ namespace JewishCat.DiscordBot.CommandHandlers
                     x.IsInline = false;
                 });
                 await ReplyAsync("", embed: builder.Build());
+                await Context.Channel.DeleteMessageAsync(Context.Message);
                 return;
             }
             
