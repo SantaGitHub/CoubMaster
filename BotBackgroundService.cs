@@ -40,6 +40,7 @@ namespace JewishCat.DiscordBot
             await _client.LoginAsync(TokenType.Bot, _token);
             await _client.StartAsync();
             _logger.LogInformation("Started Bot");
+            await _client.SetGameAsync("!help", type: ActivityType.Listening);
             await base.StartAsync(cancellationToken);
         }
 
