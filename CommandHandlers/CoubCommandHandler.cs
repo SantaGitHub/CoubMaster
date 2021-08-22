@@ -49,9 +49,28 @@ namespace JewishCat.DiscordBot.CommandHandlers
             if (string.IsNullOrEmpty(input) || !input.Contains("coub.com/view/"))
                 return;
             
-            var coub = input.Split(' ').First();
+            var coubLink = input.Split(' ').First();
             var ping = input.Split(' ').Length > 1 ? string.Join(' ', input.Split(' ')[1..]) : string.Empty;
-            var name = coub.Split('/').Last();
+            var name = coubLink.Split('/').Last();
+
+            var iconUrl = string.IsNullOrEmpty(Context.User.GetAvatarUrl())
+                ? Context.User.GetDefaultAvatarUrl()
+                : Context.User.GetAvatarUrl();
+            var builder = new EmbedBuilder()
+            {
+                Author = new EmbedAuthorBuilder()
+                {
+                    Name = Context.User.Username,
+                    IconUrl = iconUrl
+                },
+                Color = Color.Orange
+            };
+            builder.AddField(x =>
+            {
+                x.Name = "Link to coub:";
+                x.Value = coubLink;
+                x.IsInline = false;
+            });
             
             var request = new RestRequest($"{CoubsUrlBase}{name}", Method.GET);
             request.AddHeader("Cookie", "is_logged_in=false");
@@ -62,7 +81,14 @@ namespace JewishCat.DiscordBot.CommandHandlers
 
             if (response.Content.Contains("Coub not found"))
             {
-                await ReplyAsync($"Coub: {coub} - не найден");
+                builder.Color = Color.Red;
+                builder.AddField(x =>
+                {
+                    x.Name = "Message:";
+                    x.Value = "Coub не найден";
+                    x.IsInline = false;
+                });
+                await ReplyAsync("", embed: builder.Build());
                 return;
             }
 
@@ -73,8 +99,14 @@ namespace JewishCat.DiscordBot.CommandHandlers
             var client = new RestClient();
             if (string.IsNullOrEmpty(coubModel.file_versions.share.@default))
             {
-                await ReplyAsync(
-                    $"Coub: {coub} has no share link. Please click the \"Download\" button on the Coub website for a link to appear. And try again");
+                builder.Color = Color.Red;
+                builder.AddField(x =>
+                {
+                    x.Name = "Message:";
+                    x.Value = "Coub has no share link. Please click the \"Download\" button on the Coub website for a link to appear. And try again";
+                    x.IsInline = false;
+                });
+                await ReplyAsync("", embed: builder.Build());
                 return;
             }
             
@@ -92,21 +124,7 @@ namespace JewishCat.DiscordBot.CommandHandlers
                 await File.WriteAllBytesAsync($"coubs/{name}.mp4", responseBytes.RawBytes);
             }
 
-            var builder = new EmbedBuilder()
-            {
-                Author = new EmbedAuthorBuilder()
-                {
-                    Name = Context.User.Username,
-                    IconUrl = Context.User.GetAvatarUrl()
-                },
-                Color = Color.Orange
-            };
-            builder.AddField(x =>
-            {
-                x.Name = "Link to coub:";
-                x.Value = coub;
-                x.IsInline = false;
-            });
+
             if (!string.IsNullOrEmpty(ping))
             {
                 builder.AddField(x =>
