@@ -60,7 +60,7 @@ namespace JewishCat.DiscordBot.CommandHandlers
             {
                 Author = new EmbedAuthorBuilder()
                 {
-                    Name = Context.User.Username,
+                    Name = (await Context.Guild.GetUserAsync(Context.User.Id)).Nickname,
                     IconUrl = iconUrl
                 },
                 Color = Color.Orange
