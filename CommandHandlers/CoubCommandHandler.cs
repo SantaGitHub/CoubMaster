@@ -56,11 +56,14 @@ namespace JewishCat.DiscordBot.CommandHandlers
             var iconUrl = string.IsNullOrEmpty(Context.User.GetAvatarUrl())
                 ? Context.User.GetDefaultAvatarUrl()
                 : Context.User.GetAvatarUrl();
+            var userName = string.IsNullOrEmpty((await Context.Guild.GetUserAsync(Context.User.Id)).Nickname)
+                ? Context.User.Username
+                : (await Context.Guild.GetUserAsync(Context.User.Id)).Nickname;
             var builder = new EmbedBuilder()
             {
                 Author = new EmbedAuthorBuilder()
                 {
-                    Name = (await Context.Guild.GetUserAsync(Context.User.Id)).Nickname,
+                    Name = userName,
                     IconUrl = iconUrl
                 },
                 Color = Color.Orange
